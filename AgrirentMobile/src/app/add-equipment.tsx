@@ -64,7 +64,6 @@ if (!locationResponse.ok) {
 
   return;
 }
-
       const response = await fetch(
       'http://10.3.11.46:8000/equipment',
   {
