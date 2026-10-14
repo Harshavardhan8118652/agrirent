@@ -1,0 +1,38 @@
+@app.post("/login")
+def login_user(user: UserLogin):
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT user_id, name, phone, password_hash, role
+        FROM users
+        WHERE phone = %s
+        """,
+        (user.phone,)
+    )
+
+    existing_user = cursor.fetchone()
+
+    cursor.close()
+
+    if existing_user is None:
+        return {
+            "message": "User not found"
+        }
+
+    password_matches = bcrypt.checkpw(
+        user.password.encode("utf-8"),
+        existing_user["password_hash"].encode("utf-8")
+    )
+
+    if not password_matches:
+        return {
+            "message": "Incorrect password"
+        }
+
+    return {
+        "message": "Login successful",
+        "user_id": existing_user["user_id"],
+        "name": existing_user["name"],
+        "role": existing_user["role"]
+    }
